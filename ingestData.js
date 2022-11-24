@@ -1,4 +1,5 @@
 const AWS = require("aws-sdk");
+const { assert } = require("console");
 const csv = require('csvtojson');
 const { Sequelize, Model, DataTypes } = require("sequelize");
 
@@ -29,18 +30,58 @@ const sequelize = new Sequelize(path, {
           rejectUnauthorized: false
         }
       }
-});  
-sequelize.authenticate().then(() => {
-    console.log("Success!");
-    }).catch((err) => {
-    console.log(err);
-    });
+}); 
+const authenticate = async () => {
+    await sequelize.authenticate().then(() => {
+        console.log("Success!");
+        }).catch((err) => {
+        console.log(err);
+    });    
+}
 
-const fetchData = async () => {
-    const peopleDataJSON = await retrieveCSV(peopleKey);
-    // console.log(peopleDataJSON);
-    const companiesDataJSON = await retrieveCSV(companiesKey);
-    // console.log(companiesDataJSON);
+// since I need to define schema and PK/FK, this function is going to be fairly manual
+// the sequelize.define method has built in CREATE TABLE IF NOT EXISTS
+const createTables = async () => {
+    await authenticate();
+    sequelize.define('people', {
+        PERSON_ID: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            primaryKey: true
+        },
+        COMPANY_NAME: DataTypes.STRING,
+        COMPANY_LI_NAME: DataTypes.STRING,
+        LAST_TITLE: DataTypes.STRING,
+        GROUP_START_DATE: DataTypes.DATE,
+        GROUP_END_DATE: DataTypes.DATE
+    }).sync(); 
+
+    sequelize.define('companies', {
+        NAME: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            primaryKey: true
+        },
+        COMPANY_LINKEDIN_NAMES: DataTypes.ARRAY(DataTypes.STRING),
+        DESCRIPTION: DataTypes.STRING,
+        HEADCOUNT: DataTypes.INTEGER,
+        FOUNDING_DATE: DataTypes.DATE,
+        MOST_RECENT_RAISE: DataTypes.DATE,
+        MOST_RECENT_VALUATION: DataTypes.INTEGER,
+        INVESTORS: DataTypes.ARRAY(DataTypes.STRING),
+        KNOWN_TOTAL_FUNDING: DataTypes.INTEGER,
+    }).sync();
+    
+    const people = sequelize.model('people')
+    const companies = sequelize.model('companies')
+    // COMPANY_NAME is the foreign key linking to companies model, need to define that
+}
+createTables();
+// tables are not being created
+
+
+const insertData = async (key) => {
+    const dataJSON = await retrieveCSV(key);
 };
 
-fetchData();
+insertData(peopleKey);
