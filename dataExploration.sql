@@ -44,3 +44,71 @@ ORDER BY "NAME";
 
 -- lol I'm in the people table PERSON_ID = 'd4d9ca7b-e515-4bb9-96a1-1f80995349a6'
 -- this must be scraped from Linkedin
+
+-- it looks like COMPANY_LI_NAME may be a better identifier than COMPANY_NAME
+-- but there are also a lot of entries with 'n/a' in COMPANY_LI_NAME
+
+SELECT 
+    "COMPANY_NAME"
+    , "COMPANY_LI_NAME"
+    , COUNT(*)
+FROM people
+GROUP BY 1,2
+ORDER BY COUNT(*) DESC;
+
+SELECT DISTINCT "COMPANY_NAME" FROM people WHERE "COMPANY_LI_NAME" = 'microsoft' AND "COMPANY_NAME" != 'Microsoft';
+                COMPANY_NAME                 
+---------------------------------------------
+ Microsoft - Applied Research and Technology
+ Microsoft (China)
+ Microsoft China Co. Ltd
+ Microsoft Corp
+ Microsoft Corporation
+ Microsoft MSGD
+ Microsoft Research
+ Microsoft Research Asia
+ Microsoft Research Asian
+ Microsoft Visio Marketing
+
+
+select "NAME", "COMPANY_LINKEDIN_NAMES" from companies where "NAME" ILIKE '%Microsoft%';
+
+   NAME    | COMPANY_LINKEDIN_NAMES 
+-----------+------------------------
+ Microsoft | {microsoft}
+
+-- it seems like the most effective structure would be to have "COMPANY_LINKEDIN_NAMES" in companies contain all LI_NAMES from people table
+-- but this field looks incomplete, and I see only very few entries (25) with multiple LI NAMES in companies:
+ select "NAME", "COMPANY_LINKEDIN_NAMES" from companies where ARRAY_LENGTH("COMPANY_LINKEDIN_NAMES", 1) > 1;
+
+                 NAME                  |                  COMPANY_LINKEDIN_NAMES                   
+---------------------------------------+-----------------------------------------------------------
+ Captain®                              | {captainhq?trk,captainhq}
+ Genomadix                             | {genomadix,genomadix-bio}
+ RGo Robotics                          | {rgorobotics,r-gorobotics}
+ Facedrive                             | {steeresg,facedrivecanada}
+ 180 Degrees Consulting                | {180-degrees-consulting,180degreesconsulting}
+ Sendouts                              | {bullhorn,sendouts}
+ ivee                                  | {iveeapp,ivee}
+ Noom                                  | {noom,noom-inc}
+ WebHostingBuzz                        | {799597,webhostingbuzz}
+ Impossible Foods                      | {impossible-foods-inc%2e,impossible-foods-inc.}
+ Shakers                               | {shakersworks,shakersxyz}
+ tonies® - Boxine GmbH                 | {boxine-gmbh,tonies-gmbh}
+ Solivus                               | {solivus,solivusltd}
+ Turing.com                            | {turing,turingcom}
+ Stefan's Head                         | {stefan's-head,stefan%27s-head}
+ LeoLabs, Inc.                         | {leolabs-inc%2e,leolabs-inc.}
+ Imperial College London               | {5106,imperial-college-london}
+ Renovate America                      | {renovate-america,renovateamerica}
+ Coronet Blockchain                    | {coronet-blockchain,53171782}
+ Zebra Technologies                    | {167024,zebra-technologies}
+ PayShepherd                           | {payshepherd,project-recapture-inc}
+ Impossible Foods                      | {impossible-foods-inc%2e,impossible-foods-inc.}
+ LTI - Larsen & Toubro Infotech        | {l%26t-infotech,l&t-infotech}
+ IPICO                                 | {the-active-network,ipico-inc.}
+ ieIMPACT Appraisal Data Entry Service | {ieimpact-technologies-inc.,ieimpact-technologies-inc%2e}
+
+ -- given that COMPANY_LINKEDIN_NAMES in the companies table is incomplete, its not worth joining on that field for now
+ -- given more time, I would make sure data in the companies table includes all Linkedin names from the people table
+ -- then I would use the linkedin names as a join keys

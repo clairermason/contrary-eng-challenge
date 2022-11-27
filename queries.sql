@@ -51,9 +51,11 @@ SELECT COUNT(*) AS "COMPANIES_NO_PEOPLE_WORK_FOR" FROM base
 -- Question 3:
 -- What are the ten most popular companies that these 1,000 people have worked for? 
 -- most popular = the most people have worked at
+-- if I just take "COMPANY_NAME" then I get 'Hewlett Packard Enterprise' and 'Hewlett-Packard' as separate companies
+-- they have the same LI name, so I'm going to use that
 
 SELECT
-    "COMPANY_NAME"
+    CASE WHEN "COMPANY_LI_NAME" = 'n/a' THEN "COMPANY_NAME" ELSE "COMPANY_LI_NAME" END AS "COMPANY"
     , COUNT(DISTINCT "PERSON_ID") AS "PEOPLE_COUNT"
 FROM people
 GROUP BY 1
@@ -61,18 +63,18 @@ ORDER BY 2 DESC
 LIMIT 10;
 
 -- this list is not shocking
-        COMPANY_NAME        | PEOPLE_COUNT 
+          COMPANY           | PEOPLE_COUNT 
 ----------------------------+--------------
- Microsoft                  |           84
- Amazon                     |           74
- Intel Corporation          |           50
- Google                     |           42
- Hewlett Packard Enterprise |           23
- Apple                      |           22
- Facebook                   |           20
- Texas Instruments          |           17
- Hewlett-Packard            |           15
- Meta                       |           15
+ microsoft                  |           95
+ amazon                     |           76
+ intel-corporation          |           54
+ hewlett-packard-enterprise |           52
+ google                     |           43
+ meta                       |           34
+ apple                      |           27
+ ibm                        |           19
+ adobe                      |           18
+ texas-instruments          |           17
 
 -- Question 4:
 -- Identify company founders in the people table. 
