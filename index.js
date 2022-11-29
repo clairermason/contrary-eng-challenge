@@ -16,6 +16,8 @@ app.get('/', (request, response) => {
   })
 
 app.get('/avg-funding-by-person/:id', db.avgFundingByPerson)
+app.get('/companies-by-person/:id', db.companiesByPerson)
+app.get('/investors-by-company/:id', db.investorsByCompany)
 
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)

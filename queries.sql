@@ -8,7 +8,7 @@
 -- What is the average total funding of all of the companies that the person with ID = ‘92a52877-8d5d-41a6-950f-1b9c6574be7a’ has worked at?
 
 -- this person has worked at 2 compaies (a hospital and Amazon) and only 1 (Amazon) has an entry in companies table.
--- I'm going to assume if there is no entry in the companies table there is 0 funding
+-- I'm going to assume if there is no entry in the companies table there is 0 funding and looking at the API prompt that is a good assumption
 -- I would ask what this stat is being used for to influence that logic, like maybe we are only interested in companies if we have data on them
 -- for now this is sufficient
 

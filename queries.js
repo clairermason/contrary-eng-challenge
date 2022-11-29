@@ -8,8 +8,6 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 })
 
-// can I dynamically source these queries? I dont want to duplicate code
-// this is just copied from queries.sql
 const avgFundingByPerson = (request, response) => {
     const id = request.params.id
     const queryString = `
@@ -35,7 +33,44 @@ const avgFundingByPerson = (request, response) => {
     })
   }
 
+const companiesByPerson = (request, response) => {
+    const id = request.params.id
+    const queryString = `
+    SELECT "COMPANY_NAME" FROM people WHERE "PERSON_ID" = $1;`
+
+    pool.query(queryString, [id], (error, results) => {
+      if (error) {
+        throw error
+      }
+      response.status(200).json(results.rows)
+    })
+  }
+
+const investorsByCompany = (request, response) => {
+    const id = request.params.id
+    const queryString = `
+    WITH unnested_li_names AS (
+        SELECT
+            unnest("COMPANY_LINKEDIN_NAMES") as "COMPANY_LINKEDIN_NAME"
+            , "INVESTORS"
+        FROM companies
+        )
+        SELECT
+            "INVESTORS"
+        FROM unnested_li_names
+        WHERE "COMPANY_LINKEDIN_NAME" = $1;`
+
+    pool.query(queryString, [id], (error, results) => {
+      if (error) {
+        throw error
+      }
+      response.status(200).json(results.rows)
+    })
+  }
+
 
   module.exports = {
-    avgFundingByPerson
+    avgFundingByPerson,
+    companiesByPerson,
+    investorsByCompany
   }
