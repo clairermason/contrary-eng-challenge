@@ -8,11 +8,26 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 })
 
-const getUsers = (request, response) => {
+// can I dynamically source these queries? I dont want to duplicate code
+// this is just copied from queries.sql
+const avgFundingByPerson = (request, response) => {
     const id = request.params.id
-    console.log(id);
-    console.log(typeof(id))
-    pool.query('SELECT * FROM people WHERE "PERSON_ID" = $1', [id], (error, results) => {
+    const queryString = `
+        WITH base AS (
+            SELECT
+            p."PERSON_ID"
+            , p."COMPANY_NAME"
+            , COALESCE(c."KNOWN_TOTAL_FUNDING", 0) AS KNOWN_TOTAL_FUNDING
+            FROM people p
+            LEFT JOIN companies c
+                ON c."NAME" = p."COMPANY_NAME"
+            WHERE "PERSON_ID" = $1
+        )
+        SELECT
+            ROUND(AVG(KNOWN_TOTAL_FUNDING)) AS AVG_FUNDING
+        FROM base`
+
+    pool.query(queryString, [id], (error, results) => {
       if (error) {
         throw error
       }
@@ -20,6 +35,7 @@ const getUsers = (request, response) => {
     })
   }
 
+
   module.exports = {
-    getUsers
+    avgFundingByPerson
   }
