@@ -9,7 +9,10 @@ const pool = new Pool({
 })
 
 const getUsers = (request, response) => {
-    pool.query('SELECT * FROM people LIMIT 10', (error, results) => {
+    const id = request.params.id
+    console.log(id);
+    console.log(typeof(id))
+    pool.query('SELECT * FROM people WHERE "PERSON_ID" = $1', [id], (error, results) => {
       if (error) {
         throw error
       }
