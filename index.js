@@ -2,7 +2,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const db = require('./queries')
 const app = express()
-const port = 3000
+// these are local configs. I want to deploy to heroku so I need different configs
+const port = process.env.PORT || 3000
 
 app.use(bodyParser.json())
 app.use(
