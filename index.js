@@ -2,7 +2,6 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const db = require('./queries')
 const app = express()
-// these are local configs. I want to deploy to heroku so I need different configs
 const port = process.env.PORT || 3000
 
 app.use(bodyParser.json())
@@ -13,7 +12,7 @@ app.use(
 )
 
 app.get('/', (request, response) => {
-    response.json({ info: 'Node.js, Express, and Postgres API' })
+    response.json({ info: `Welcome to Claire's Contrary Capital Engineering Challenge! This app is built with Node.js, Express, and Postgres and is written in Javascript` })
   })
 
 app.get('/avg-funding-by-person/:id', db.avgFundingByPerson)
