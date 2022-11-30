@@ -78,7 +78,8 @@ select "NAME", "COMPANY_LINKEDIN_NAMES" from companies where "NAME" ILIKE '%Micr
  Microsoft | {microsoft}
 
 -- it seems like the most effective structure would be to have "COMPANY_LINKEDIN_NAMES" in companies contain all LI_NAMES from people table
--- but this field looks incomplete, and I see only very few entries (25) with multiple LI NAMES in companies:
+-- but this field looks incomplete, and I see only very few entries (25) with multiple LI NAMES in companies 
+-- and most of these look like errors ('%'):
  select "NAME", "COMPANY_LINKEDIN_NAMES" from companies where ARRAY_LENGTH("COMPANY_LINKEDIN_NAMES", 1) > 1;
 
                  NAME                  |                  COMPANY_LINKEDIN_NAMES                   
@@ -110,70 +111,20 @@ select "NAME", "COMPANY_LINKEDIN_NAMES" from companies where "NAME" ILIKE '%Micr
  ieIMPACT Appraisal Data Entry Service | {ieimpact-technologies-inc.,ieimpact-technologies-inc%2e}
 
  -- given more time, I would make sure data in the companies table includes all Linkedin names from the people table 
+ -- that would be pretty tricky to insert since I will need a join to company name at some point
 
 -- what if I join on first element of linkedin name?
  SELECT 
-    COUNT(*)
+    COUNT(DISTINCT "COMPANY_NAME")
 FROM companies c
 INNER JOIN people p
     ON c."COMPANY_LINKEDIN_NAMES"[1] = "COMPANY_LI_NAME"
--- 2877
+-- 1776
 
  SELECT 
-    COUNT(*)
+    COUNT(DISTINCT "COMPANY_NAME")
 FROM companies c
 INNER JOIN people p
     ON c."NAME" = p."COMPANY_NAME";
--- 2100
-
--- compare linkedin join vs. company_name join
-WITH li AS (
-    SELECT DISTINCT 
-    "COMPANY_NAME"
-    , "COMPANY_LI_NAME"
-    , 'linkedin_name' AS "MATCH_TYPE" 
-    FROM companies c    
-    INNER JOIN people p
-    ON c."COMPANY_LINKEDIN_NAMES"[1] = "COMPANY_LI_NAME"
-)
-, company_name AS (
-    SELECT
-        DISTINCT 
-        "COMPANY_NAME"
-        , "COMPANY_LI_NAME"
-        , 'company_name' AS "MATCH_TYPE"
-    FROM companies c
-    INNER JOIN people p
-    ON c."NAME" = p."COMPANY_NAME"
-)
-, matches AS (
-SELECT  
-    COALESCE(c."COMPANY_NAME", li."COMPANY_NAME") AS "COMPANY_NAME"
-    , COALESCE(c."COMPANY_LI_NAME", li."COMPANY_LI_NAME") AS "COMPANY_LI_NAME"
-    , CASE WHEN c."MATCH_TYPE" IS NOT NULL AND li."MATCH_TYPE" IS NOT NULL THEN 'both' 
-           ELSE COALESCE(c."MATCH_TYPE", li."MATCH_TYPE") END AS "MATCH_TYPE"
-FROM company_name c
-FULL OUTER JOIN li
-    ON li."COMPANY_NAME" = c."COMPANY_NAME"
-    --ON li."COMPANY_LI_NAME" = c."COMPANY_LI_NAME"
-)
-SELECT
-    "MATCH_TYPE"
-    , COUNT(*)
-FROM matches
-GROUP BY 1
-;
--- join on company_name in matches CTE:
-  MATCH_TYPE   | count 
----------------+-------
- company_name  |    14
- linkedin_name |   413
- both          |  1378
-
- -- join on linkedin_name in matches CTE:
-   MATCH_TYPE   | count 
----------------+-------
- company_name  |     4
- linkedin_name |   551
- both          |  1239
--- either way, joining on linkedin name is better and most companies are joined in both methods
+-- 1230
+-- so it looks like joining on linkedin name is better
