@@ -1,6 +1,19 @@
-I have spun up a postgres server in my Heroku app
-Since data needs to be accessible in my Heroku app, I will skip the step of getting data into local server
-I need to ingest data from these public s3 buckets into the server
-I will write the script ingestData.js and run it locally using node
-then I can query the server using psql
-then I will create the API endpoints
+#### Claire Mason Contrary Capital Backend/Data Engineering Take-Home Assessment
+
+I used Postgres, Node,js, Javascript, Express and Heroku on this app.  
+Links to API Routes:  
+[/avg-funding-by-person/d4d9ca7b-e515-4bb9-96a1-1f80995349a6](https://contrary-eng-challenge.herokuapp.com/avg-funding-by-person/d4d9ca7b-e515-4bb9-96a1-1f80995349a6)  
+[/companies-by-person/d4d9ca7b-e515-4bb9-96a1-1f80995349a6](https://contrary-eng-challenge.herokuapp.com/companies-by-person/d4d9ca7b-e515-4bb9-96a1-1f80995349a6)  
+[/investors-by-company/uber-com](https://contrary-eng-challenge.herokuapp.com/investors-by-company/uber-com)  
+
+### Part 1:
+
+I spun up a Postgres server in my Heroku app and since data needs to be there anyways, I skipped a local server and ingested data into my postgres server directly. See [ingestData.js](LINK).  
+
+### Part 2:
+
+I did a bunch of exploratory analysis in the file [dataExploration.sql](LINK) and wrote answers to the SQL questions in [queries.sql](LINK).  
+
+### Part 3:
+
+I used Express and Node.js to build my REST APIs and deployed my app on Heroku! 
