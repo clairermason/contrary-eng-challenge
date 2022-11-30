@@ -17,3 +17,8 @@ I did a bunch of exploratory analysis in the file [dataExploration.sql](LINK) an
 ### Part 3:
 
 I used Express and Node.js to build my REST APIs and deployed my app on Heroku! 
+
+### Next Steps (given more time):
+1. I found that Linkedin names were a better join key, but the data is incomplete in its current form. Given more time I would have created a new table with all company names and all associated Linkedin names.
+2. I would dedupe the companies table because there are quite a few duplicates on "COMPANY_NAME"
+3. I would build unit tests / integration tests and a frontend
