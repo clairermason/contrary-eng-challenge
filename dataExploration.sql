@@ -109,6 +109,71 @@ select "NAME", "COMPANY_LINKEDIN_NAMES" from companies where "NAME" ILIKE '%Micr
  IPICO                                 | {the-active-network,ipico-inc.}
  ieIMPACT Appraisal Data Entry Service | {ieimpact-technologies-inc.,ieimpact-technologies-inc%2e}
 
- -- given that COMPANY_LINKEDIN_NAMES in the companies table is incomplete, its not worth joining on that field for now
- -- given more time, I would make sure data in the companies table includes all Linkedin names from the people table
- -- then I would use the linkedin names as a join keys
+ -- given more time, I would make sure data in the companies table includes all Linkedin names from the people table 
+
+-- what if I join on first element of linkedin name?
+ SELECT 
+    COUNT(*)
+FROM companies c
+INNER JOIN people p
+    ON c."COMPANY_LINKEDIN_NAMES"[1] = "COMPANY_LI_NAME"
+-- 2877
+
+ SELECT 
+    COUNT(*)
+FROM companies c
+INNER JOIN people p
+    ON c."NAME" = p."COMPANY_NAME";
+-- 2100
+
+-- compare linkedin join vs. company_name join
+WITH li AS (
+    SELECT DISTINCT 
+    "COMPANY_NAME"
+    , "COMPANY_LI_NAME"
+    , 'linkedin_name' AS "MATCH_TYPE" 
+    FROM companies c    
+    INNER JOIN people p
+    ON c."COMPANY_LINKEDIN_NAMES"[1] = "COMPANY_LI_NAME"
+)
+, company_name AS (
+    SELECT
+        DISTINCT 
+        "COMPANY_NAME"
+        , "COMPANY_LI_NAME"
+        , 'company_name' AS "MATCH_TYPE"
+    FROM companies c
+    INNER JOIN people p
+    ON c."NAME" = p."COMPANY_NAME"
+)
+, matches AS (
+SELECT  
+    COALESCE(c."COMPANY_NAME", li."COMPANY_NAME") AS "COMPANY_NAME"
+    , COALESCE(c."COMPANY_LI_NAME", li."COMPANY_LI_NAME") AS "COMPANY_LI_NAME"
+    , CASE WHEN c."MATCH_TYPE" IS NOT NULL AND li."MATCH_TYPE" IS NOT NULL THEN 'both' 
+           ELSE COALESCE(c."MATCH_TYPE", li."MATCH_TYPE") END AS "MATCH_TYPE"
+FROM company_name c
+FULL OUTER JOIN li
+    ON li."COMPANY_NAME" = c."COMPANY_NAME"
+    --ON li."COMPANY_LI_NAME" = c."COMPANY_LI_NAME"
+)
+SELECT
+    "MATCH_TYPE"
+    , COUNT(*)
+FROM matches
+GROUP BY 1
+;
+-- join on company_name in matches CTE:
+  MATCH_TYPE   | count 
+---------------+-------
+ company_name  |    14
+ linkedin_name |   413
+ both          |  1378
+
+ -- join on linkedin_name in matches CTE:
+   MATCH_TYPE   | count 
+---------------+-------
+ company_name  |     4
+ linkedin_name |   551
+ both          |  1239
+-- either way, joining on linkedin name is better and most companies are joined in both methods
