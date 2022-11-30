@@ -1,6 +1,6 @@
 #### Claire Mason Contrary Capital Backend/Data Engineering Take-Home Assessment
 
-I used Postgres, Node,js, Javascript, Express and Heroku on this app.  
+I used Postgres, Node.js, Javascript, Express and Heroku on this app.  
 Links to API Routes:  
 [/avg-funding-by-person/d4d9ca7b-e515-4bb9-96a1-1f80995349a6](https://contrary-eng-challenge.herokuapp.com/avg-funding-by-person/d4d9ca7b-e515-4bb9-96a1-1f80995349a6)  
 [/companies-by-person/d4d9ca7b-e515-4bb9-96a1-1f80995349a6](https://contrary-eng-challenge.herokuapp.com/companies-by-person/d4d9ca7b-e515-4bb9-96a1-1f80995349a6)  
