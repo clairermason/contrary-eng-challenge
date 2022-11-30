@@ -18,7 +18,7 @@ const avgFundingByPerson = (request, response) => {
             , COALESCE(c."KNOWN_TOTAL_FUNDING", 0) AS KNOWN_TOTAL_FUNDING
             FROM people p
             LEFT JOIN companies c
-                ON c."NAME" = p."COMPANY_NAME"
+                ON c."COMPANY_LINKEDIN_NAMES"[1] = p."COMPANY_LI_NAME"
             WHERE "PERSON_ID" = $1
         )
         SELECT
@@ -46,9 +46,9 @@ const companiesByPerson = (request, response) => {
     })
   }
 
-// if I just use the linkedin name field from companies it is very incomplete according to the people table
-// should I insert data into the companies table?
-// or should I search on the people table also?
+// given more time, I would create another table to track linkedin names and their relationship to company names
+// this would be a complete log of all linkedin names associated with a company from both the companies and people table
+// for now, I am only using linkedin names from the company table because it would take a long time to vet the logic of the new table
 const investorsByCompany = (request, response) => {
     const id = request.params.id
     const queryString = `

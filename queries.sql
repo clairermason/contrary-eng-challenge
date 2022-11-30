@@ -19,7 +19,7 @@ WITH base AS (
     , COALESCE(c."KNOWN_TOTAL_FUNDING", 0) AS KNOWN_TOTAL_FUNDING
     FROM people p
     LEFT JOIN companies c
-        ON c."NAME" = p."COMPANY_NAME"
+        ON c."COMPANY_LINKEDIN_NAMES"[1] = p."COMPANY_LI_NAME"
     WHERE "PERSON_ID" = '92a52877-8d5d-41a6-950f-1b9c6574be7a'
 )
 SELECT
@@ -39,13 +39,14 @@ SELECT DISTINCT
     c."NAME"
 FROM companies c
 LEFT JOIN people p
-    ON p."COMPANY_NAME" = c."NAME"
+    ON p."COMPANY_LI_NAME" = c."COMPANY_LINKEDIN_NAMES"[1]
 WHERE p."COMPANY_NAME" IS NULL
 )
 SELECT COUNT(*) AS "COMPANIES_NO_PEOPLE_WORK_FOR" FROM base
 ;
--- result: 9403
+-- result: 8977
 -- that seems like a really high number considering there are only 10711 rows in companies, but the query is right
+-- they must be scraped from different sources
 
 
 -- Question 3:
@@ -105,25 +106,37 @@ ORDER BY 2 DESC;
 
  WITH founded_companies AS (
     SELECT DISTINCT
-        "COMPANY_NAME"
+        "COMPANY_LI_NAME"
+        , "COMPANY_NAME"
+        , "LAST_TITLE"
         , "PERSON_ID"
     FROM people
     WHERE "LAST_TITLE" ILIKE '%Founder%'
+    -- I'm looking at the company '500global' and it looks like an accelerator program from a VC
+    -- I'm eliminating this person because they did not found 500global, I think they participated in the accelerator
+    AND "PERSON_ID" != '10e5dcc5-a642-4941-9701-9194101b27ed'
+    -- the person with ebay-for-business has this title Founder/General Manager (Ebay Seller)
+    -- I think they are an ebay seller not founder of ebay, so I will eliminate that person
+    AND "PERSON_ID" != 'a292842c-475e-4b4f-9671-fb09536c472e'
 )
 , hc_rank AS (
     SELECT DISTINCT
-    f."COMPANY_NAME"
+    f."COMPANY_LI_NAME"
+    , f."COMPANY_NAME"
     , f."PERSON_ID"
+    , f."LAST_TITLE"
     , c."HEADCOUNT"
     , RANK() OVER (ORDER BY "HEADCOUNT" DESC NULLS LAST) AS "HEADCOUNT_RANK"
     -- RANK is sufficient here because ties on headcount are legitamate
 FROM founded_companies f
 -- I can inner join because we only care about companies that match between tables
 INNER JOIN companies c
-    ON c."NAME" = f."COMPANY_NAME"
+    ON c."COMPANY_LINKEDIN_NAMES"[1] = f."COMPANY_LI_NAME"
+    -- I checked this join using COMPANY_NAME and LI name gives better results
 )
 SELECT 
     "COMPANY_NAME"
+    , "LAST_TITLE" -- pulling in title helps check for weirdness
     , "PERSON_ID"
     , "HEADCOUNT"
 FROM hc_rank
@@ -131,11 +144,12 @@ WHERE "HEADCOUNT_RANK" <= 3
 ORDER BY "HEADCOUNT" DESC;
 
 -- result:
-   COMPANY_NAME    |              PERSON_ID               | HEADCOUNT 
--------------------+--------------------------------------+-----------
- Dafiti            | bb0d8489-4360-4a94-bd3d-c079f75afc96 |      2907
- eBay for Business | a292842c-475e-4b4f-9671-fb09536c472e |      1336
- UWorld            | c6f69f63-c7d5-419f-af34-d0cccf544e18 |       439
+
+ COMPANY_NAME |              LAST_TITLE              |              PERSON_ID               | HEADCOUNT 
+--------------+--------------------------------------+--------------------------------------+-----------
+ Dafiti       | Co-founder & Managing Director Chile | bb0d8489-4360-4a94-bd3d-c079f75afc96 |      2907
+ Auth0        | Co-Founder                           | 1561f8d1-1be7-4c50-9c55-f359e5c920be |       656
+ UWorld       | Founder & CEO                        | c6f69f63-c7d5-419f-af34-d0cccf544e18 |       439
 
 -- Question 5:
 -- For each person in the people table, 
