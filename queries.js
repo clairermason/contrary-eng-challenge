@@ -46,6 +46,9 @@ const companiesByPerson = (request, response) => {
     })
   }
 
+// if I just use the linkedin name field from companies it is very incomplete according to the people table
+// should I insert data into the companies table?
+// or should I search on the people table also?
 const investorsByCompany = (request, response) => {
     const id = request.params.id
     const queryString = `
